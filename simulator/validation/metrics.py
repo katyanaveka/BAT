@@ -21,7 +21,7 @@ def clicks_sum_metric(clicks: pd.Series, desired_clicks: pd.Series) -> float:
 
 def cpc_rel(budget: pd.Series,
             desired_clicks: pd.Series,
-            real_clicks: pd.Series,
+            real_clicks: pd.Series, 
             spend_history: pd.Series) -> float:
     # cpc = Budget / desired_clicks
     # abs(1 - rel) -> min
@@ -41,22 +41,10 @@ def cpc_rel(budget: pd.Series,
     spend_padded = np.array(spend_padded)
 
     mask_to_penalty = (clicks_padded.sum(axis=1) < thr).astype(int) * penalty
-
     real_cpc = np.divide(spend_padded, clicks_padded, out=np.zeros_like(spend_padded), where=clicks_padded != 0)
     real_cpc = real_cpc.mean(axis=1) + mask_to_penalty
-    # print(real_cpc.shape)
     real_cpc_mean = real_cpc.mean() / cpc
     return real_cpc_mean
-
-
-def cpc_wp_ctr(cpc: pd.Series):
-    '''
-    в simulate.py усредняем значение
-    (bid / click) / ctr (удельный бид за клик / CTR)
-    по таймстемпам для каждой кампании
-    '''
-    # print(cpc)
-    return cpc.mean()
 
 
 def pad_spend_with_zeros(spend_history: List[float], target_length: int) -> np.ndarray:
@@ -154,8 +142,7 @@ def compile_metrics(hist_data: pd.DataFrame) -> Tuple[float, float]:
             initial_balance=('initial_balance', 'first'),
             desired_clicks=('desired_clicks', 'first'),
             spend_history=('spend_history', lambda x: list(x)),
-            clicks_history=('clicks_history', lambda x: list(x)),
-            cpc_history=('cpc', 'last')
+            clicks_history=('clicks_history', lambda x: list(x))
         )
     )
     traffic = Traffic(path='../data/traffic_share.csv')
@@ -168,14 +155,13 @@ def compile_metrics(hist_data: pd.DataFrame) -> Tuple[float, float]:
         spend_history=data['spend_history'],
         budget=data['initial_balance']
     )
+
     quickspend = quickspend_metric(data['spend_history'],
                                    data['initial_balance'])
-    # cpc_relative = cpc_rel(
-    #     budget=data['initial_balance'],
-    #     desired_clicks=data['desired_clicks'],
-    #     real_clicks=data["clicks_history"],
-    #     spend_history=data['spend_history']
-    # )
-
-    cpc = cpc_wp_ctr(cpc=data['cpc_history'])
-    return (cpc, rmse, clicks_sum, quickspend), data
+    cpc_relative = cpc_rel(
+        budget=data['initial_balance'],
+        desired_clicks=data['desired_clicks'],
+        real_clicks=data["clicks_history"],
+        spend_history=data['spend_history']
+    )
+    return (cpc_relative, rmse, clicks_sum, quickspend)

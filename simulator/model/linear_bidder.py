@@ -6,9 +6,6 @@ from simulator.model.traffic import Traffic
 from simulator.simulation.modules import History
 from simulator.simulation.utils import bin2price, price2bin
 
-# целевая функция трат заранее за сутки
-# вариант а) тратим линейно
-# вариант б) пусть функция меняется каждые сутки
 
 class LinearBidder(_Bidder):
     default_params = {
@@ -18,6 +15,7 @@ class LinearBidder(_Bidder):
         'lower_clip': 5,
         'upper_clip': 5
     }
+
     def __init__(self, params: dict = None):
         """
         Baseline solution implementing a simple controller.
@@ -47,7 +45,7 @@ class LinearBidder(_Bidder):
         initial_balance = bidding_input_params['initial_balance']
         start = bidding_input_params['campaign_start_time']
         end = bidding_input_params['campaign_end_time']
-        
+
         # Cold start bid
         if len(history.rows) == 0:
             return initial_balance * self.cold_start_coef

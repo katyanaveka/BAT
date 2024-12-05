@@ -13,10 +13,10 @@ from simulator.simulation.modules import History
 class MPIDBidder(_Bidder):
     default_k_dict = {
         'k_p': (4.377576468445429e-06, 0.0333706926755201),
-        'k_i': (0.5624063314848002, 0.6955061331189949), 
+        'k_i': (0.5624063314848002, 0.6955061331189949),
         'k_d': (0.008335020922363772, 0.003801165974001581)
     }
-    
+
     default_params = {
         'B': 1000.0,
         'n': 1,
@@ -45,8 +45,8 @@ class MPIDBidder(_Bidder):
         self.lower_clip = params.get('lower_clip', self.default_params['lower_clip'])
         self.upper_clip = params.get('upper_clip', self.default_params['upper_clip'])
         self.bid_factor = params.get('bid_factor', self.default_params['bid_factor'])
-        self.temp_constr = 25 #params.get('temp_constr', 1)
-        self.temp_coef = 5 # params.get('temp_coef', 1)
+        self.temp_constr = 25  # params.get('temp_constr', 1)
+        self.temp_coef = 5  # params.get('temp_coef', 1)
 
         if self.B <= 0 or self.n <= 0:
             raise ValueError("B and n must be positive")
@@ -71,7 +71,7 @@ class MPIDBidder(_Bidder):
     def _init_params(self, B):
         constraint = B / self.temp_constr
         # Desired clicks, same as for the autobidder_check function
-        n = max(1, B // 100.0)  # Formula from section Model predictive PID (M-PID), for CPC
+        # n = max(1, B // 100.0)  # Formula from section Model predictive PID (M-PID), for CPC
         # Initial state vector [p, q]
         self.x_0: np.ndarray = np.array([0, 0])
         # Error history for PID controller
@@ -135,7 +135,7 @@ class MPIDBidder(_Bidder):
         k_d = self.k_dict['k_d']
 
         u = k_p * self.error[-1] + k_i * sum(self.error) +\
-         (k_d * (self.error[-1] - self.error[-2]) if len(self.error) > 1 else 0)
+            (k_d * (self.error[-1] - self.error[-2]) if len(self.error) > 1 else 0)
         if self.click:
             u[1] /= self.click
         u = self.apply_alpha(u)
@@ -173,10 +173,6 @@ class MPIDBidder(_Bidder):
         wp = bidding_input_params['wp_for_lp']
         ctr = bidding_input_params['ctr_for_lp']
         cvr = bidding_input_params['cr_for_lp']
-        # print(cvr)
-        # print(type(cvr))
-        # print(ctr)
-        # print(type(ctr))
         B, C, N = self.B, self.C, cvr.shape[0]
         c = np.ones(N + 2)
         c[-2], c[-1] = B, 0

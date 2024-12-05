@@ -1,10 +1,6 @@
 from .utils import price2bin, bin2price
 from .modules import SimulationResult, Campaign, History
 from ..model.bidder import _Bidder
-# from ..model.m_pid import MPIDBidder
-# from ..model.slivkins_bidder import SlivkinsBidder
-from ..model.robust import RobustBid
-from ..model.simple import SimpleBid
 import pandas as pd
 from typing import Tuple
 
@@ -17,7 +13,6 @@ def simulate_step(
 ) -> SimulationResult:
     """
     Simulate one step of the auction for a 1-hour period.
-
     Args:
         stats_pdf: Statistics dataframe
         campaign: Current campaign object
@@ -102,12 +97,9 @@ def simulate_campaign(
     bidder_clicks = 0
     # For M-PID only, not used for cold start, so could be set any
     campaign_ctr, campaign_cr = 0.0, 0.0
-    wp_for_lp: float = None
-    ctr_for_lp: float = None
-    cr_for_lp: float = None
-    cvr_list: list = []
-    cpc: list = []
-    cur_cpc: float = None
+    wp_for_lp = None
+    ctr_for_lp = None
+    cr_for_lp = None
 
     while campaign.curr_time < campaign.campaign_end:
         # Request bid from bidder
@@ -132,15 +124,12 @@ def simulate_campaign(
                     'prev_contacts': campaign.prev_contacts,
                     'prev_time': campaign.prev_time,
                     'desired_clicks': campaign.desired_clicks,
-                    'desired_time': campaign.desired_time,  # delete
+                    'desired_time': campaign.desired_time,
                     'prev_ctr': campaign_ctr,
                     'prev_cr': campaign_cr,
                     'ctr_for_lp': ctr_for_lp,
                     'cr_for_lp': cr_for_lp,
-                    'wp_for_lp': wp_for_lp,
-                    'winning': campaign.winning,
-                    'T': campaign.T,
-                    'cvr_list': cvr_list
+                    'wp_for_lp': wp_for_lp
                 }
         )
 
@@ -153,9 +142,6 @@ def simulate_campaign(
         )
         bidder_spend = simulation_result.spent
         bidder_clicks = simulation_result.clicks
-        if campaign_ctr and bidder_clicks:  # скипаем стартовый шаг
-            cur_cpc = (bidder_spend / bidder_clicks) / campaign_ctr
-            cpc.append(cur_cpc)
 
         # Adjust results if spend exceeds budget
         coef = 1.0
@@ -172,13 +158,22 @@ def simulate_campaign(
         campaign.contacts += simulation_result.contacts * coef
         campaign.curr_time += 3600
 
+        # Get stats for the current time window
+        stats_window = (
+            stats_file
+            [
+                (stats_file['period'] >= campaign.curr_time - 3600) &
+                (stats_file['period'] < campaign.curr_time) &
+                (stats_file['campaign_id'] == campaign.campaign_id)
+            ]
+            .copy()
+        )
+
         # Find the nearest stats window with logs
-        stats_window = pd.DataFrame()
-        i = 0
+        i = 1
         while stats_window.empty:
             stats_window = (
-                stats_file
-                [
+                stats_file[
                     (stats_file['period'] >= campaign.curr_time - 3600 * i) &
                     (stats_file['period'] < campaign.curr_time - 3600 * (i - 1)) &
                     (stats_file['campaign_id'] == campaign.campaign_id)
@@ -188,28 +183,20 @@ def simulate_campaign(
             i += 1
 
         # Collect CTR, CVR for M-PID with campaign's history
-        # if isinstance(bidder, MPIDBidder) or isinstance(bidder, SlivkinsBidder):
-        # if isinstance(bidder, RobustBid) or isinstance(bidder, SimpleBid):
-        if any(c.__name__ in ['SimpleBid', 'RobustBid'] for c in type(bidder).__mro__):
+        if any(c.__name__ in ['MPIDBidder', 'SlivkinsBidder'] for c in type(bidder).__mro__):
+            # Calculate this only one time through simulation
             if ctr_for_lp is None:
                 ctr_for_lp, cr_for_lp, wp_for_lp = ctr_cvr_count_for_lp(stats_window)
 
             campaign_ctr, campaign_cr = ctr_cvr_count(stats_window, bid)
-            cvr_list.append(campaign_cr)
-
-        if bidder_clicks > 0.1:
-            campaign.winning = True
-            campaign.T += 1
-        else:
-            campaign.winning = False
+            # print(campaign_ctr)
 
         # Add record to simulation history
         simulation_history.add(
             campaign=campaign,
             bid=bid,
             spend=bidder_spend,
-            clicks=bidder_clicks,
-            cpc=sum(cpc) / len(cpc) if len(cpc) else 0
+            clicks=bidder_clicks
         )
         if campaign.balance < 0.00001:
             break
@@ -226,7 +213,7 @@ def ctr_cvr_count(stats_window: pd.DataFrame, bid: float) -> Tuple[float, float]
         closest_bin = filtered_bins.min()
     else:
         closest_bin = stats_window['contact_price_bin'].max()
-    campaign_ctr = stats_window[stats_window.contact_price_bin == closest_bin]['CTRPredicts_noised'].max()
+    campaign_ctr = stats_window[stats_window.contact_price_bin == closest_bin]['CTRPredicts'].max()
     campaign_cr = stats_window[stats_window.contact_price_bin == closest_bin]['CRPredicts'].max()
     return campaign_ctr, campaign_cr
 
@@ -235,7 +222,7 @@ def ctr_cvr_count_for_lp(stats_window: pd.DataFrame) -> Tuple[pd.Series, pd.Seri
     """
     Extract CTR, CVR, and winning prices for LP problem in M-PID.
     """
-    campaign_ctr = stats_window['CTRPredicts_noised']  # CTRPredicts_noised
+    campaign_ctr = stats_window['CTRPredicts']
     campaign_cr = stats_window['CRPredicts']
     wp_for_lp = bin2price(stats_window['contact_price_bin'])
     return campaign_ctr, campaign_cr, wp_for_lp
