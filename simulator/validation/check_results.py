@@ -1,6 +1,5 @@
 import pandas as pd
 from time import time
-from tqdm import tqdm_notebook as tqdm
 from typing import Type, Dict, Any, List
 from simulator.simulation.simulate import simulate_campaign
 from simulator.simulation.modules import Campaign
@@ -39,7 +38,7 @@ def autobidder_check(
     for _, campaign in data_campaigns.iterrows():
         campaign_instance = create_campaign_instance(campaign, mean_click_price)
         bidder_instance = bidder(params)
-        
+
         sim_hist = simulate_campaign(
             campaign=campaign_instance,
             bidder=bidder_instance,
@@ -50,7 +49,7 @@ def autobidder_check(
 
     time_inf_end = time()
 
-    metrics, data = compile_metrics(pd.concat(hist_data_list, axis=0, ignore_index=True))
+    metrics = compile_metrics(pd.concat(hist_data_list, axis=0, ignore_index=True))
 
     time_all_end = time()
     return {
@@ -58,8 +57,7 @@ def autobidder_check(
         "status_msg": status_msg,
         "time_overall_sec": time_all_end - time_all_start,
         "time_inference_sec": time_inf_end - time_inf_start,
-        "score": metrics,
-        'data': data
+        "score": metrics
     }
 
 

@@ -59,15 +59,6 @@ class Campaign:
     prev_contacts: float = 0
     desired_clicks: int = 0  # clicks desired
     desired_time: int = 0  # lifetime desired, in hours
-    # Used for M-PID and RobustPID only, not used for cold start, so could be set any
-    campaign_ctr: float = 0.0
-    campaign_cr: float = 0.0
-    wp_for_lp: float = None
-    ctr_for_lp: float = None
-    cr_for_lp: float = None
-    winning: bool = False
-    T: int = 0
-    cvr_list: list = None
 
     def to_dict(self):
         return {
@@ -93,14 +84,6 @@ class Campaign:
             'prev_clicks': self.prev_clicks,
             'prev_balance': self.prev_balance,
             'prev_contacts': self.prev_contacts,
-            'campaign_ctr': self.campaign_ctr,
-            'campaign_cr': self.campaign_cr,
-            'wp_for_lp': self.wp_for_lp,
-            'ctr_for_lp': self.ctr_for_lp,
-            'cr_for_lp': self.cr_for_lp,
-            'winning': self.winning,
-            'T': self.T,
-            'cvr_list': self.cvr_list
         }
 
 
@@ -114,7 +97,7 @@ class History:
     def __init__(self):
         self.rows = []
 
-    def add(self, campaign: Campaign, bid: float, spend: list, clicks: list, cpc: float) -> None:
+    def add(self, campaign: Campaign, bid: float, spend: list, clicks: list) -> None:
         curr_time_str = datetime.fromtimestamp(campaign.curr_time)
 
         d = {
@@ -136,32 +119,9 @@ class History:
             'desired_clicks': campaign.desired_clicks,
             'desired_time': campaign.desired_time,
             'spend_history': spend,
-            'clicks_history': clicks,
-            'cpc': cpc
+            'clicks_history': clicks
         }
         self.rows.append(d)
 
     def to_data_frame(self) -> pd.DataFrame:
         return pd.DataFrame(self.rows)
-
-
-@dataclass
-class CampaignInstance:
-    campaign_id: int
-    campaign: Campaign
-    bidder: None
-    history: History
-
-    def __str__(self):
-        return f"CampaignInfo(campaign_id={self.campaign_id},\
-                start_hour={self.start_hour},\
-                campaign={self.campaign},\
-                bidder={self.bidder})"
-
-# @dataclass
-# class BidderLogs:
-#     p: float = None
-#     q: float = None
-#     u: float = None
-#     reference: float = None
-#     y: float = None

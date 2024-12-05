@@ -4,7 +4,7 @@ import numpy as np
 from typing import Dict, Any
 from datetime import datetime
 from ..simulation.modules import History
-from ..simulation.utils import bin2price, price2bin
+from ..simulation.utils import bin2price
 from .traffic import Traffic
 from .bidder import _Bidder
 from random import random
@@ -15,6 +15,7 @@ k_dict = {
     "k_i": 1e-4,
     "k_d": 6e-5,
 }
+
 
 def PIDcontrol(
         avg_spend: float,
@@ -53,7 +54,7 @@ def PIDcontrol(
             tr_cumsum[1:] - tr_cumsum[:-1]
         )
         # Differential component
-        d_part = K_p*T_d/dt*(
+        d_part = K_p * T_d / dt * (
             err_func[-1] - err_func[-2]
         )
         res = p_part + i_part + d_part
@@ -68,6 +69,7 @@ class TAPIDBidder(_Bidder):
         'cold_start_coef': 0.37,
         'sampling': 1,
     }
+
     def __init__(self, params: dict = None):
         super().__init__()
 
@@ -142,7 +144,7 @@ class TAPIDBidder(_Bidder):
                 pad_width=[0, 1],
                 constant_values=0,
             )
-        
+
         if not self.campaign_traffic:
             self.campaign_traffic = self.traffic.get_traffic_share(
                 region_id,
@@ -152,7 +154,7 @@ class TAPIDBidder(_Bidder):
             if self.campaign_traffic == 0:
                 return cold_start_bid
             self.avg_spend = initial_balance / self.campaign_traffic
-        
+
         action = PIDcontrol(
             self.avg_spend,
             initial_balance,
@@ -167,7 +169,7 @@ class TAPIDBidder(_Bidder):
         if 1 <= hour <= 6:
             action = action / 5
 
-        # We don't use price2bin util function, since 
+        # We don't use price2bin util function, since
         # it's important not to round the bid bin for accumulating changes
         prev_bin = np.log(prev_bid) / np.log(1.2)
         bin_ = prev_bin + action

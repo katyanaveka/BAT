@@ -1,6 +1,7 @@
 from datetime import datetime
 import pandas as pd
 
+
 class Traffic:
     def __init__(self, path: str) -> None:
         """
@@ -28,11 +29,11 @@ class Traffic:
             ts_pdf = self.traffic_share_pdf[self.traffic_share_pdf['region_id'] == 637640]
 
         traffic_share = 0.0
-        
+
         while end - start > 3600 * 24 * 7:
             traffic_share += 1.0
             end -= 3600 * 24 * 7
-        
+
         if end - start == 3600 * 24 * 7:
             return traffic_share + 1.0
 
