@@ -1,0 +1,9 @@
+# data/fpa/campaigns.csv filter=lfs diff=lfs merge=lfs -text
+# data/fpa/stats.csv filter=lfs diff=lfs merge=lfs -text
+# data/fpa/subsample_stats.csv filter=lfs diff=lfs merge=lfs -text
+# data/fpa/subsample_campaigns.csv filter=lfs diff=lfs merge=lfs -text
+# data/vcg/subsample_campaigns.csv filter=lfs diff=lfs merge=lfs -text
+# data/vcg/subsample_stats.csv filter=lfs diff=lfs merge=lfs -text
+# data/vcg/stats.csv filter=lfs diff=lfs merge=lfs -text
+# data/vcg/campaigns.csv filter=lfs diff=lfs merge=lfs -text
+# data/traffic_share.csv filter=lfs diff=lfs merge=lfs -text
