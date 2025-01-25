@@ -1,40 +1,24 @@
+# https://arxiv.org/pdf/2301.13306
+
 import numpy as np
 from typing import Dict
 from simulator.model.bidder import _Bidder
 from simulator.simulation.modules import History
 
 
-class SlivkinsBidder(_Bidder):
-    """
-    Abstract base class for bidding strategies.
-
-    This class defines the template for all bidder implementations.
-    Subclasses must implement the `place_bid` method.
-
-    Attributes:
-        Any custom attributes can be added in subclasses.
-
-    Methods:
-        __init__: Initialize the bidder (can be overridden in subclasses).
-        place_bid: Abstract method to calculate and return a bid.
-    """
+class BROI(_Bidder):
     default_params = {
-        'theta': 130,
+        'theta': 0.,
         'ro': 4,
         'v_bar': 100
     }
 
     def __init__(self, params: dict = None):
-        """
-        Initialize the bidder.
-
-        This method can be overridden in subclasses to set up any necessary attributes or state.
-        """
         super().__init__()
 
         params = params or {}
 
-        self.theta = 0.  # params.get("theta", self.default_params['theta'])
+        self.theta = params.get("theta", self.default_params['theta'])
         self.w = 0.1
         self.ro = params.get("ro", self.default_params['ro'])
         self.v_bar = params.get("v_bar", self.default_params['v_bar'])
@@ -47,39 +31,6 @@ class SlivkinsBidder(_Bidder):
         self.history_value = np.array([])
 
     def place_bid(self, bidding_input_params: Dict[str, any], history: History) -> float:
-        """
-        Calculate and return a bid based on input parameters and auction history.
-
-        This method must be implemented by all subclasses.
-
-        Args:
-            bidding_input_params (Dict[str, any]): A dictionary containing bidding input parameters.
-                Keys include:
-                - 'item_id': ID of the item
-                - 'campaign_id': ID of the paid campaign
-                - 'loc_id': Location ID
-                - 'region_id': Region ID
-                - 'logical_category': Item category
-                - 'microcat_ext': Extended item category
-                - 'initial_balance': Starting balance of the campaign
-                - 'campaign_start_time': Timestamp of campaign start
-                - 'campaign_end_time': Timestamp of campaign end
-                - 'curr_time': Current timestamp
-                - 'prev_time': Timestamp of last calculation
-                - 'prev_bid': Bid from the last calculation
-                - 'clicks': Total clicks collected by the campaign
-                - 'prev_clicks': Clicks at the last calculation
-                - 'balance': Current campaign balance
-                - 'prev_balance': Balance at the last calculation
-                Additional parameters can be included as needed.
-
-            history: Auction history for the specific campaign.
-                Note: History does not carry over between campaigns.
-                The bidder class is reinitialized when simulating a new campaign.
-
-        Returns:
-            float: The calculated bid amount.
-        """
         initial_balance = bidding_input_params['initial_balance']
         self.theta = initial_balance
         self.w = 0.1

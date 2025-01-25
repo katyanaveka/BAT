@@ -1,3 +1,5 @@
+# https://www.yahooinc.com/research/publications/mystique-a-budget-pacing-system-for-performance-optimization-in-online-advertising
+
 import numpy as np
 from simulator.model.bidder import _Bidder
 from simulator.simulation.modules import History
@@ -41,32 +43,23 @@ class Mystique(_Bidder):
         balance = bidding_input_params['balance']
         curr_time = bidding_input_params['curr_time']
 
-        '''
-        balance_previous = history.get_balance()
-        bid_previous = history.get_bids()
-        timestamp_previous = history.get_timestamps()
-        '''
-
         if len(self.bid_previous) == 0:
             self.balance_previous = np.pad(
                 self.balance_previous,
                 pad_width=[0, 1],
                 constant_values=balance,
             )
-
             self.timestamp_previous = np.pad(
                 self.timestamp_previous,
                 pad_width=[0, 1],
                 constant_values=curr_time,
                 )
-
             self.bid_previous = np.pad(
                 self.bid_previous,
                 pad_width=[0, 1],
                 constant_values=300.0,
                 )
             return 300.0
-
         else:
             day = (curr_time-start) // 3600 // 24
             hour = (curr_time-start) // 3600 % 24
