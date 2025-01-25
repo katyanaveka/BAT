@@ -1,5 +1,4 @@
-# https://arxiv.org/pdf/1905.10928
-# Section Model predictive PID (M-PID)
+# [1] https://arxiv.org/pdf/1905.10928
 
 import numpy as np
 from typing import Tuple, Dict, Any
@@ -45,8 +44,8 @@ class MPIDBidder(_Bidder):
         self.lower_clip = params.get('lower_clip', self.default_params['lower_clip'])
         self.upper_clip = params.get('upper_clip', self.default_params['upper_clip'])
         self.bid_factor = params.get('bid_factor', self.default_params['bid_factor'])
-        self.temp_constr = 25  # params.get('temp_constr', 1)
-        self.temp_coef = 5  # params.get('temp_coef', 1)
+        self.temp_constr = 25
+        self.temp_coef = 5
 
         if self.B <= 0 or self.n <= 0:
             raise ValueError("B and n must be positive")
@@ -151,7 +150,7 @@ class MPIDBidder(_Bidder):
 
     def bid_compute(self, p: float, q: float, C: float, CTR: float, CVR: float) -> float:
         p_q = max(p + q, 1e-4)
-        bid = (CVR + CTR * C * q) / p_q  # Section "Model predictive PID (M-PID)", formula of bid
+        bid = (CVR + CTR * C * q) / p_q  # Section "Model predictive PID (M-PID)" from [1], formula of bid
         return self.cold_start_coef * bid
 
     def budget_pace_count(self, bidding_input_params: Dict[str, Any]) -> float:
@@ -163,13 +162,13 @@ class MPIDBidder(_Bidder):
         if left_traffic:
             balance = bidding_input_params['balance']
             cur_traffic = self.traffic.get_traffic_share(region_id, curr_time, curr_time + 3600)
-            # Section "Model predictive PID (M-PID)", ideal spending formula
+            # Section "Model predictive PID (M-PID)" from [1], ideal spending formula
             return balance * (cur_traffic / left_traffic)
         else:
             return 0
 
     def calculate_pq(self, bidding_input_params: Dict[str, Any]) -> Tuple[float, float]:
-        # Section Problem formulation, linear programming problem
+        # Section Problem formulation from [1], linear programming problem
         wp = bidding_input_params['wp_for_lp']
         ctr = bidding_input_params['ctr_for_lp']
         cvr = bidding_input_params['cr_for_lp']
