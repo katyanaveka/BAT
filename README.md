@@ -1,7 +1,7 @@
 # BAT: Benchmark for Auto-bidding Task
 ## Overview
 
-This repository contains the benchmark implementation and supplementary materials for our paper "Title of Your Paper" (link to paper if available). It provides a comprehensive framework for evaluating and comparing different bidding strategies in online advertising auctions.
+This repository contains the benchmark implementation and supplementary materials for our paper "Title" (link). It provides a comprehensive framework for evaluating and comparing different bidding strategies in online advertising auctions.
 
 ## Key Features
 
@@ -68,11 +68,10 @@ We welcome contributions to improve the benchmark. Please feel free to submit is
 
 If you use this benchmark in your research, please cite our paper:
 
-
 ## License
 
-This project is licensed under [Your chosen license]. See the LICENSE file for details.
+This project is licensed under [Your chosen license]. See the LICENSE file for details. 
 
 ## Contact
 
-For any questions or feedback, please contact [Your Name or Team Name] at [contact email].
+For any questions or feedback, please contact [Solodneva Ekaterina] at [easolodneva@avito.ru].  ????
