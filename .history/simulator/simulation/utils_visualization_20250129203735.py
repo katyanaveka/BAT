@@ -23,7 +23,7 @@ def plot_history_article(dfs: list, model_names: list = ['ALM', 'TA-PID', 'M-PID
     legend_labels = []
 
     for idx, (name, df) in enumerate(zip(model_names, dfs)):
-        line, = axs[0].plot(df["curr_time"], df["spend_history"], color=colors[idx], linewidth=LINEWIDTH, markersize=4)
+        line, = axs[0].plot(df["curr_time"], df["_history"], color=colors[idx], linewidth=LINEWIDTH, markersize=4)
         legend_lines.append(line)
         legend_labels.append(f'{name}')
 

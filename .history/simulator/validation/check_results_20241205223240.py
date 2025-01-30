@@ -46,7 +46,6 @@ def autobidder_check(
             auction_mode=auction_mode
         )
         hist_data_list.append(sim_hist.to_data_frame())
-        break
 
     time_inf_end = time()
 

@@ -72,7 +72,7 @@ class Mystique(_Bidder):
             traffic_list = np.array([self.traffic.get_traffic_share(region_id, hour0, hour0 + 3600) for hour0 in hours])
             traffic_list = traffic_list / traffic_campaign if traffic_campaign != 0 else np.zeros_like(traffic_list)
             target_spend = initial_balance * np.cumsum(traffic_list)
-            initial_day_balance = None
+
             # Find initial_day_balance
             hour_previous = [(t - start) // 3600 % 24 for t in self.timestamp_previous]
 
@@ -87,14 +87,11 @@ class Mystique(_Bidder):
                             initial_day_balance = self.balance_previous[i]
                             break
 
-            if initial_day_balance is None:
-                initial_day_balance = self.balance_previous[-1]
-
             if initial_day_balance - balance >= day_quote:
                 if self.count % 3 != 1:
                     bid = self.bid_previous[-1]
                 else:
-                    bid = 0.95 * self.bid_previous[-1]
+                    bid = 0.95*self.bid_previous[-1]
 
                 self.balance_previous = np.pad(
                     self.balance_previous,

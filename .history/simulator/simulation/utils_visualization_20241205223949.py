@@ -23,7 +23,7 @@ def plot_history_article(dfs: list, model_names: list = ['ALM', 'TA-PID', 'M-PID
     legend_labels = []
 
     for idx, (name, df) in enumerate(zip(model_names, dfs)):
-        line, = axs[0].plot(df["curr_time"], df["spend_history"], color=colors[idx], linewidth=LINEWIDTH, markersize=4)
+        line, = axs[0].plot(df["curr_time"], df["spend"], color=colors[idx], linewidth=LINEWIDTH, markersize=4)
         legend_lines.append(line)
         legend_labels.append(f'{name}')
 
@@ -97,7 +97,7 @@ def data_prep_vis(viz_data: pd.DataFrame) -> pd.DataFrame:
 
     clicks = np.hstack((0, viz_data.clicks))
     clicks_per_hour = [clicks[i] - clicks[i-1] for i in range(1, len(clicks))]
-    viz_data['cpc'] = viz_data.spend_history / clicks_per_hour
+    viz_data['cpc'] = viz_data.spend / clicks_per_hour
     viz_data['cpc'] = viz_data['cpc'].fillna(0)
 
     return viz_data
